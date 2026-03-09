@@ -1,61 +1,65 @@
+import { useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { AdminHeader } from '@/components/admin/AdminHeader';
 import { StatsCard } from '@/components/admin/StatsCard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { store } from '@/lib/store';
-import { 
-  MapPin, 
-  Calendar, 
-  Users, 
+import {
+  MapPin,
+  Calendar,
+  Users,
   IndianRupee,
   Clock,
   ArrowRight,
-  TrendingUp
+  AlertCircle,
+  CheckCircle2,
+  ShieldAlert,
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
 
 const AdminDashboard = () => {
   const bookings = store.getBookings();
   const turfs = store.getTurfs();
-  
+  const pendingTurfs = store.getPendingTurfs();
+
   const totalRevenue = bookings
-    .filter(b => b.status === 'confirmed' || b.status === 'completed')
+    .filter((b) => b.status === 'confirmed' || b.status === 'completed')
     .reduce((sum, b) => sum + b.totalAmount, 0);
-  
-  const pendingBookings = bookings.filter(b => b.status === 'pending');
+
+  const pendingBookings = bookings.filter((b) => b.status === 'pending');
   const recentBookings = [...bookings]
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .slice(0, 5);
 
   const stats = [
-    { 
-      label: 'Total Turfs', 
-      value: turfs.length.toString(), 
-      change: '+2 this month',
-      changeType: 'positive' as const,
-      icon: MapPin 
+    {
+      label: 'Total Turfs',
+      value: turfs.length.toString(),
+      change: `${pendingTurfs.length} pending approval`,
+      changeType: pendingTurfs.length > 0 ? 'neutral' as const : 'positive' as const,
+      icon: MapPin,
     },
-    { 
-      label: 'Total Bookings', 
-      value: bookings.length.toString(), 
+    {
+      label: 'Total Bookings',
+      value: bookings.length.toString(),
       change: '+15% vs last month',
       changeType: 'positive' as const,
-      icon: Calendar 
+      icon: Calendar,
     },
-    { 
-      label: 'Pending Bookings', 
-      value: pendingBookings.length.toString(), 
+    {
+      label: 'Pending Bookings',
+      value: pendingBookings.length.toString(),
       change: 'Needs attention',
       changeType: 'neutral' as const,
-      icon: Clock 
+      icon: Clock,
     },
-    { 
-      label: 'Revenue', 
-      value: `₹${(totalRevenue / 1000).toFixed(1)}K`, 
+    {
+      label: 'Revenue',
+      value: `₹${(totalRevenue / 1000).toFixed(1)}K`,
       change: '+22% vs last month',
       changeType: 'positive' as const,
-      icon: IndianRupee 
+      icon: IndianRupee,
     },
   ];
 
@@ -76,19 +80,39 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen">
-      <AdminHeader 
-        title="Dashboard" 
-        subtitle="Welcome back! Here's what's happening with your turfs."
+      <AdminHeader
+        title="Admin Dashboard"
+        subtitle="Platform overview and management"
       />
-      
+
       <main className="p-6">
+        {/* Pending Turf Approvals Alert */}
+        {pendingTurfs.length > 0 && (
+          <div className="flex items-center gap-3 p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 mb-6">
+            <ShieldAlert className="w-5 h-5 text-amber-500" />
+            <div className="flex-1">
+              <p className="font-semibold text-foreground">
+                {pendingTurfs.length} turf(s) awaiting approval
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Review and approve new turf submissions from owners
+              </p>
+            </div>
+            <Link to="/admin/turfs?filter=pending">
+              <Button variant="hero" size="sm">
+                Review Now
+              </Button>
+            </Link>
+          </div>
+        )}
+
         {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {stats.map((stat, index) => (
             <StatsCard key={stat.label} {...stat} delay={index * 0.1} />
           ))}
         </div>
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Recent Bookings */}
           <Card className="border-border">
@@ -112,18 +136,22 @@ const AdminDashboard = () => {
                     className="flex items-center justify-between p-4 rounded-xl bg-secondary/50 hover:bg-secondary transition-colors"
                   >
                     <div className="min-w-0 flex-1">
-                      <p className="font-semibold text-foreground truncate">{booking.customerName}</p>
+                      <p className="font-semibold text-foreground truncate">
+                        {booking.customerName}
+                      </p>
                       <p className="text-sm text-muted-foreground truncate">
                         {booking.turfName}
                       </p>
                     </div>
                     <div className="flex items-center gap-4 ml-4">
                       <div className="text-right hidden sm:block">
-                        <p className="font-bold text-foreground">₹{booking.totalAmount.toLocaleString()}</p>
+                        <p className="font-bold text-foreground">
+                          ₹{booking.totalAmount.toLocaleString()}
+                        </p>
                         <p className="text-xs text-muted-foreground">
-                          {new Date(booking.date).toLocaleDateString('en-IN', { 
-                            day: 'numeric', 
-                            month: 'short' 
+                          {new Date(booking.date).toLocaleDateString('en-IN', {
+                            day: 'numeric',
+                            month: 'short',
                           })}
                         </p>
                       </div>
@@ -131,7 +159,7 @@ const AdminDashboard = () => {
                     </div>
                   </div>
                 ))}
-                
+
                 {recentBookings.length === 0 && (
                   <div className="text-center py-8 text-muted-foreground">
                     <Calendar className="w-12 h-12 mx-auto mb-2 opacity-50" />
@@ -141,8 +169,8 @@ const AdminDashboard = () => {
               </div>
             </CardContent>
           </Card>
-          
-          {/* Quick Actions & Performance */}
+
+          {/* Quick Actions & Alerts */}
           <div className="space-y-6">
             {/* Quick Actions */}
             <Card className="border-border">
@@ -152,8 +180,8 @@ const AdminDashboard = () => {
               <CardContent className="grid grid-cols-2 gap-3">
                 <Link to="/admin/turfs">
                   <Button variant="outline" className="w-full h-20 flex-col gap-2">
-                    <MapPin className="w-5 h-5" />
-                    <span>Add New Turf</span>
+                    <CheckCircle2 className="w-5 h-5" />
+                    <span>Approve Turfs</span>
                   </Button>
                 </Link>
                 <Link to="/admin/bookings">
@@ -170,13 +198,13 @@ const AdminDashboard = () => {
                 </Link>
                 <Link to="/admin/settings">
                   <Button variant="outline" className="w-full h-20 flex-col gap-2">
-                    <TrendingUp className="w-5 h-5" />
-                    <span>View Analytics</span>
+                    <AlertCircle className="w-5 h-5" />
+                    <span>Settings</span>
                   </Button>
                 </Link>
               </CardContent>
             </Card>
-            
+
             {/* Pending Attention */}
             {pendingBookings.length > 0 && (
               <Card className="border-primary/50 bg-primary/5">
@@ -188,9 +216,10 @@ const AdminDashboard = () => {
                       </div>
                       <div>
                         <p className="font-semibold text-foreground">
-                          {pendingBookings.length} Pending Booking{pendingBookings.length > 1 ? 's' : ''}
+                          {pendingBookings.length} Pending Booking
+                          {pendingBookings.length > 1 ? 's' : ''}
                         </p>
-                        <p className="text-sm text-muted-foreground">Requires your attention</p>
+                        <p className="text-sm text-muted-foreground">Requires attention</p>
                       </div>
                     </div>
                     <Link to="/admin/bookings?status=pending">
