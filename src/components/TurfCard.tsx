@@ -9,11 +9,12 @@ import { cn } from '@/lib/utils';
 interface TurfCardProps {
   turf: Turf;
   className?: string;
+  style?: React.CSSProperties;
 }
 
-export const TurfCard = ({ turf, className }: TurfCardProps) => {
+export const TurfCard = ({ turf, className, style }: TurfCardProps) => {
   return (
-    <Card variant="elevated" className={cn("overflow-hidden group", className)}>
+    <Card variant="elevated" className={cn("overflow-hidden group", className)} style={style}>
       {/* Image */}
       <div className="relative h-48 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20" />

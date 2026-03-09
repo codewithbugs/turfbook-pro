@@ -1,29 +1,12 @@
-import { Turf, Booking, TimeSlot } from './types';
-import { turfs as initialTurfs, cities as initialCities, generateTimeSlots, calculateDiscount } from './data';
-
-// Extended types for admin functionality
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  role: 'user' | 'admin';
-  createdAt: string;
-}
-
-export interface BookingWithDetails extends Booking {
-  turfName: string;
-  customerName: string;
-  customerEmail: string;
-  customerPhone: string;
-}
+import { Turf, Booking, BookingWithDetails, TimeSlot, BlockedSlot, User, TurfApprovalStatus, BookingStatus } from './types';
+import { turfs as initialTurfs, generateTimeSlots } from './data';
+import { mockLogin } from './auth-context';
 
 // Store state
 interface StoreState {
   turfs: Turf[];
   bookings: BookingWithDetails[];
-  currentUser: User | null;
-  isAuthenticated: boolean;
+  blockedSlots: BlockedSlot[];
 }
 
 // Initial mock bookings with details
@@ -105,13 +88,12 @@ const mockBookings: BookingWithDetails[] = [
   },
 ];
 
-// Simple in-memory store (without backend)
+// Simple in-memory store
 class Store {
   private state: StoreState = {
     turfs: [...initialTurfs],
     bookings: [...mockBookings],
-    currentUser: null,
-    isAuthenticated: false,
+    blockedSlots: [],
   };
 
   private listeners: Set<() => void> = new Set();
@@ -129,56 +111,18 @@ class Store {
     return this.state;
   }
 
-  // Auth methods
-  login(email: string, password: string): { success: boolean; error?: string } {
-    // Mock authentication
-    if (email && password.length >= 6) {
-      const isAdmin = email.includes('admin');
-      this.state = {
-        ...this.state,
-        currentUser: {
-          id: 'user-' + Date.now(),
-          name: isAdmin ? 'Admin User' : 'John Doe',
-          email,
-          phone: '+91 98765 43210',
-          role: isAdmin ? 'admin' : 'user',
-          createdAt: new Date().toISOString(),
-        },
-        isAuthenticated: true,
-      };
-      this.notify();
-      return { success: true };
-    }
-    return { success: false, error: 'Invalid credentials' };
-  }
-
-  register(name: string, email: string, phone: string, password: string): { success: boolean; error?: string } {
-    if (name && email && phone && password.length >= 6) {
-      this.state = {
-        ...this.state,
-        currentUser: {
-          id: 'user-' + Date.now(),
-          name,
-          email,
-          phone,
-          role: 'user',
-          createdAt: new Date().toISOString(),
-        },
-        isAuthenticated: true,
-      };
-      this.notify();
-      return { success: true };
-    }
-    return { success: false, error: 'Please fill all fields correctly' };
-  }
-
-  logout() {
-    this.state = {
-      ...this.state,
-      currentUser: null,
-      isAuthenticated: false,
+  // Mock login helper (for demo without Auth0 configured)
+  mockLoginAs(role: 'user' | 'owner' | 'admin', name?: string, email?: string) {
+    const user: User = {
+      id: 'user-' + Date.now(),
+      name: name || (role === 'admin' ? 'Admin User' : role === 'owner' ? 'Turf Owner' : 'John Doe'),
+      email: email || `${role}@turfbook.in`,
+      phone: '+91 98765 43210',
+      role,
+      createdAt: new Date().toISOString(),
     };
-    this.notify();
+    mockLogin(user);
+    return user;
   }
 
   // Turf methods
@@ -186,14 +130,29 @@ class Store {
     return this.state.turfs;
   }
 
+  getApprovedTurfs() {
+    return this.state.turfs.filter((t) => t.approvalStatus === 'approved');
+  }
+
+  getTurfsByOwner(ownerId: string) {
+    return this.state.turfs.filter((t) => t.ownerId === ownerId);
+  }
+
+  getPendingTurfs() {
+    return this.state.turfs.filter((t) => t.approvalStatus === 'pending');
+  }
+
   getTurfById(id: string) {
     return this.state.turfs.find((t) => t.id === id);
   }
 
-  addTurf(turf: Omit<Turf, 'id'>) {
+  addTurf(turf: Omit<Turf, 'id' | 'createdAt' | 'updatedAt'>) {
+    const now = new Date().toISOString();
     const newTurf: Turf = {
       ...turf,
       id: 'turf-' + Date.now(),
+      createdAt: now,
+      updatedAt: now,
     };
     this.state = {
       ...this.state,
@@ -207,7 +166,7 @@ class Store {
     this.state = {
       ...this.state,
       turfs: this.state.turfs.map((t) =>
-        t.id === id ? { ...t, ...updates } : t
+        t.id === id ? { ...t, ...updates, updatedAt: new Date().toISOString() } : t
       ),
     };
     this.notify();
@@ -221,6 +180,19 @@ class Store {
     this.notify();
   }
 
+  // Admin turf approval
+  approveTurf(id: string) {
+    this.updateTurf(id, { approvalStatus: 'approved', adminComment: undefined });
+  }
+
+  rejectTurf(id: string, comment: string) {
+    this.updateTurf(id, { approvalStatus: 'rejected', adminComment: comment });
+  }
+
+  requestChanges(id: string, comment: string) {
+    this.updateTurf(id, { approvalStatus: 'changes_requested', adminComment: comment });
+  }
+
   // Booking methods
   getBookings() {
     return this.state.bookings;
@@ -228,6 +200,11 @@ class Store {
 
   getUserBookings(userId: string) {
     return this.state.bookings.filter((b) => b.userId === userId);
+  }
+
+  getBookingsForOwnerTurfs(ownerId: string) {
+    const ownerTurfIds = this.getTurfsByOwner(ownerId).map((t) => t.id);
+    return this.state.bookings.filter((b) => ownerTurfIds.includes(b.turfId));
   }
 
   createBooking(booking: Omit<BookingWithDetails, 'id' | 'createdAt'>): BookingWithDetails {
@@ -244,7 +221,7 @@ class Store {
     return newBooking;
   }
 
-  updateBookingStatus(id: string, status: Booking['status']) {
+  updateBookingStatus(id: string, status: BookingStatus) {
     this.state = {
       ...this.state,
       bookings: this.state.bookings.map((b) =>
@@ -257,6 +234,36 @@ class Store {
   cancelBooking(id: string) {
     this.updateBookingStatus(id, 'cancelled');
   }
+
+  // Blocked slots (owner manual booking / slot blocking)
+  getBlockedSlots(turfId: string) {
+    return this.state.blockedSlots.filter((s) => s.turfId === turfId);
+  }
+
+  blockSlots(turfId: string, date: string, slotIds: string[], reason: string) {
+    const blocked: BlockedSlot = {
+      id: 'block-' + Date.now(),
+      turfId,
+      date,
+      slotIds,
+      reason,
+      createdAt: new Date().toISOString(),
+    };
+    this.state = {
+      ...this.state,
+      blockedSlots: [...this.state.blockedSlots, blocked],
+    };
+    this.notify();
+    return blocked;
+  }
+
+  unblockSlots(blockId: string) {
+    this.state = {
+      ...this.state,
+      blockedSlots: this.state.blockedSlots.filter((s) => s.id !== blockId),
+    };
+    this.notify();
+  }
 }
 
 export const store = new Store();
@@ -268,7 +275,7 @@ export function useStore() {
   const [state, setState] = useState(store.getState());
 
   useEffect(() => {
-    const unsubscribe = store.subscribe(() => setState(store.getState()));
+    const unsubscribe = store.subscribe(() => setState({ ...store.getState() }));
     return () => { unsubscribe(); };
   }, []);
 

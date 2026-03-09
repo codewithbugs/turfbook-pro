@@ -1,9 +1,24 @@
+export type UserRole = 'user' | 'owner' | 'admin';
+export type SportType = 'cricket' | 'football';
+export type BookingStatus = 'pending' | 'confirmed' | 'cancelled' | 'completed';
+export type TurfApprovalStatus = 'pending' | 'approved' | 'rejected' | 'changes_requested';
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  role: UserRole;
+  avatar?: string;
+  createdAt: string;
+}
+
 export interface Turf {
   id: string;
   name: string;
   city: string;
   address: string;
-  sports: ('cricket' | 'football')[];
+  sports: SportType[];
   pricePerHour: number;
   rating: number;
   reviewCount: number;
@@ -12,6 +27,11 @@ export interface Turf {
   openTime: string;
   closeTime: string;
   featured?: boolean;
+  ownerId: string;
+  approvalStatus: TurfApprovalStatus;
+  adminComment?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface TimeSlot {
@@ -19,6 +39,8 @@ export interface TimeSlot {
   time: string;
   available: boolean;
   price: number;
+  blockedByOwner?: boolean;
+  blockedReason?: string;
 }
 
 export interface Booking {
@@ -27,10 +49,17 @@ export interface Booking {
   userId: string;
   date: string;
   slots: string[];
-  sport: 'cricket' | 'football';
+  sport: SportType;
   totalAmount: number;
-  status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
+  status: BookingStatus;
   createdAt: string;
+}
+
+export interface BookingWithDetails extends Booking {
+  turfName: string;
+  customerName: string;
+  customerEmail: string;
+  customerPhone: string;
 }
 
 export interface City {
@@ -38,4 +67,13 @@ export interface City {
   name: string;
   turfCount: number;
   imageUrl: string;
+}
+
+export interface BlockedSlot {
+  id: string;
+  turfId: string;
+  date: string;
+  slotIds: string[];
+  reason: string;
+  createdAt: string;
 }

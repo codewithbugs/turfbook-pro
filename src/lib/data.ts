@@ -24,6 +24,10 @@ export const turfs: Turf[] = [
     openTime: '06:00',
     closeTime: '23:00',
     featured: true,
+    ownerId: 'owner-1',
+    approvalStatus: 'approved',
+    createdAt: '2024-01-15T00:00:00Z',
+    updatedAt: '2024-06-01T00:00:00Z',
   },
   {
     id: 'turf-2',
@@ -39,6 +43,10 @@ export const turfs: Turf[] = [
     openTime: '05:00',
     closeTime: '22:00',
     featured: true,
+    ownerId: 'owner-1',
+    approvalStatus: 'approved',
+    createdAt: '2024-02-10T00:00:00Z',
+    updatedAt: '2024-06-01T00:00:00Z',
   },
   {
     id: 'turf-3',
@@ -54,6 +62,10 @@ export const turfs: Turf[] = [
     openTime: '06:00',
     closeTime: '21:00',
     featured: true,
+    ownerId: 'owner-2',
+    approvalStatus: 'approved',
+    createdAt: '2024-03-01T00:00:00Z',
+    updatedAt: '2024-06-01T00:00:00Z',
   },
   {
     id: 'turf-4',
@@ -68,6 +80,10 @@ export const turfs: Turf[] = [
     amenities: ['Floodlights', 'Parking', 'Changing Rooms', 'Refreshments'],
     openTime: '06:00',
     closeTime: '23:00',
+    ownerId: 'owner-2',
+    approvalStatus: 'approved',
+    createdAt: '2024-03-15T00:00:00Z',
+    updatedAt: '2024-06-01T00:00:00Z',
   },
   {
     id: 'turf-5',
@@ -83,6 +99,10 @@ export const turfs: Turf[] = [
     openTime: '05:00',
     closeTime: '00:00',
     featured: true,
+    ownerId: 'owner-3',
+    approvalStatus: 'approved',
+    createdAt: '2024-04-01T00:00:00Z',
+    updatedAt: '2024-06-01T00:00:00Z',
   },
   {
     id: 'turf-6',
@@ -97,6 +117,10 @@ export const turfs: Turf[] = [
     amenities: ['Floodlights', 'Parking', 'Practice Nets'],
     openTime: '06:00',
     closeTime: '22:00',
+    ownerId: 'owner-3',
+    approvalStatus: 'approved',
+    createdAt: '2024-04-15T00:00:00Z',
+    updatedAt: '2024-06-01T00:00:00Z',
   },
 ];
 
@@ -104,11 +128,11 @@ export const generateTimeSlots = (date: Date, pricePerHour: number): TimeSlot[] 
   const slots: TimeSlot[] = [];
   const now = new Date();
   const isToday = date.toDateString() === now.toDateString();
-  
+
   for (let hour = 6; hour <= 22; hour++) {
     const isPast = isToday && hour <= now.getHours();
     const isBooked = Math.random() > 0.7;
-    
+
     slots.push({
       id: `slot-${hour}`,
       time: `${hour.toString().padStart(2, '0')}:00`,
@@ -116,13 +140,13 @@ export const generateTimeSlots = (date: Date, pricePerHour: number): TimeSlot[] 
       price: pricePerHour,
     });
   }
-  
+
   return slots;
 };
 
 export const calculateDiscount = (hours: number): number => {
-  if (hours >= 4) return 0.20; // 20% off for 4+ hours
-  if (hours >= 3) return 0.15; // 15% off for 3 hours
-  if (hours >= 2) return 0.10; // 10% off for 2 hours
+  if (hours >= 4) return 0.20;
+  if (hours >= 3) return 0.15;
+  if (hours >= 2) return 0.10;
   return 0;
 };
