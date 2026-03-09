@@ -58,7 +58,7 @@ const App = () => (
               <Route
                 path="/bookings"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute allowedRoles={['user']}>
                     <Bookings />
                   </ProtectedRoute>
                 }
@@ -66,7 +66,7 @@ const App = () => (
               <Route
                 path="/checkout"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute allowedRoles={['user']}>
                     <Checkout />
                   </ProtectedRoute>
                 }
@@ -74,7 +74,7 @@ const App = () => (
               <Route
                 path="/booking-success"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute allowedRoles={['user']}>
                     <BookingSuccess />
                   </ProtectedRoute>
                 }

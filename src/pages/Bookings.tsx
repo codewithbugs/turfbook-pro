@@ -3,33 +3,47 @@ import { Footer } from '@/components/Footer';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, MapPin, Clock, AlertCircle } from 'lucide-react';
+import { useMemo } from 'react';
+import { Calendar, MapPin, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '@/lib/auth-context';
+import { useStore, store } from '@/lib/store';
+import { toast } from '@/hooks/use-toast';
 
 const Bookings = () => {
-  // Mock bookings data - would come from database
-  const bookings = [
-    {
-      id: '1',
-      turfName: 'Green Arena Sports Complex',
-      address: 'Andheri West, Mumbai',
-      date: '2024-01-15',
-      time: '18:00 - 20:00',
-      sport: 'Football',
-      amount: 2700,
-      status: 'confirmed',
-    },
-    {
-      id: '2',
-      turfName: 'Premier Turf Club',
-      address: 'Powai, Mumbai',
-      date: '2024-01-18',
-      time: '09:00 - 11:00',
-      sport: 'Football',
-      amount: 3240,
-      status: 'pending',
-    },
-  ];
+  const { user } = useAuth();
+  const { bookings: bookingState, turfs } = useStore();
+
+  const bookings = useMemo(() => {
+    const userId = user?.id || '';
+    if (!userId) return [];
+
+    return store
+      .getUserBookings(userId)
+      .map((booking) => {
+        const turf = turfs.find((t) => t.id === booking.turfId);
+        const firstSlot = booking.slots[0];
+        const lastSlot = booking.slots[booking.slots.length - 1];
+        const firstHour = parseInt(firstSlot?.replace('slot-', '') || '0', 10);
+        const lastHour = parseInt(lastSlot?.replace('slot-', '') || '0', 10) + 1;
+        const timeRange = `${firstHour.toString().padStart(2, '0')}:00 - ${lastHour
+          .toString()
+          .padStart(2, '0')}:00`;
+
+        return {
+          id: booking.id,
+          turfId: booking.turfId,
+          turfName: booking.turfName,
+          address: turf?.address || 'Address unavailable',
+          date: booking.date,
+          time: timeRange,
+          sport: booking.sport,
+          amount: booking.totalAmount,
+          status: booking.status,
+        };
+      })
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, [user?.id, bookingState, turfs]);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -42,6 +56,19 @@ const Bookings = () => {
       default:
         return <Badge variant="secondary">{status}</Badge>;
     }
+  };
+
+  const bookingSummary = useMemo(() => {
+    return {
+      total: bookings.length,
+      upcoming: bookings.filter((b) => b.status === 'confirmed' || b.status === 'pending').length,
+      cancelled: bookings.filter((b) => b.status === 'cancelled').length,
+    };
+  }, [bookings]);
+
+  const handleCancel = (bookingId: string) => {
+    store.cancelBooking(bookingId);
+    toast({ title: 'Booking cancelled', description: 'Your booking was cancelled successfully.' });
   };
 
   return (
@@ -58,6 +85,29 @@ const Bookings = () => {
               View and manage your turf bookings
             </p>
           </div>
+
+          {bookings.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
+              <Card>
+                <CardContent className="p-4">
+                  <p className="text-xs text-muted-foreground">Total</p>
+                  <p className="font-display text-2xl font-bold text-foreground">{bookingSummary.total}</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4">
+                  <p className="text-xs text-muted-foreground">Upcoming</p>
+                  <p className="font-display text-2xl font-bold text-foreground">{bookingSummary.upcoming}</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4">
+                  <p className="text-xs text-muted-foreground">Cancelled</p>
+                  <p className="font-display text-2xl font-bold text-foreground">{bookingSummary.cancelled}</p>
+                </CardContent>
+              </Card>
+            </div>
+          )}
 
           {bookings.length > 0 ? (
             <div className="space-y-4">
@@ -96,11 +146,25 @@ const Bookings = () => {
                           <p className="text-2xl font-bold text-foreground font-display">
                             ₹{booking.amount.toLocaleString()}
                           </p>
-                          <p className="text-sm text-muted-foreground">{booking.sport}</p>
+                          <p className="text-sm text-muted-foreground capitalize">{booking.sport}</p>
                         </div>
-                        <Button variant="outline" size="sm">
-                          View Details
-                        </Button>
+                        <div className="flex items-center gap-2">
+                          <Link to={`/turf/${booking.turfId}`}>
+                            <Button variant="outline" size="sm">
+                              Book Again
+                            </Button>
+                          </Link>
+                          {(booking.status === 'pending' || booking.status === 'confirmed') && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-destructive hover:text-destructive"
+                              onClick={() => handleCancel(booking.id)}
+                            >
+                              Cancel
+                            </Button>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </CardContent>

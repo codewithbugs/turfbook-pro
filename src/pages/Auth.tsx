@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
+import { Link, Navigate, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -15,7 +15,7 @@ const Auth = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAuthenticated, login: auth0Login, loginWithGoogle, loginWithPhone } = useAuth();
+  const { isAuthenticated, loginWithGoogle, loginWithPhone } = useAuth();
   const initialMode = searchParams.get('mode') || 'login';
   const from = (location.state as any)?.from || '/';
 
@@ -31,10 +31,19 @@ const Auth = () => {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
 
+  const getMockIdentityFromEmail = (value: string): { id: string; role: UserRole; name: string } => {
+    const normalized = value.trim().toLowerCase();
+    if (normalized.includes('admin')) return { id: 'admin-1', role: 'admin', name: 'Admin User' };
+    if (normalized === 'owner@example.com' || normalized.includes('owner')) {
+      return { id: 'owner-1', role: 'owner', name: 'Turf Owner' };
+    }
+    if (normalized === 'rahul@example.com') return { id: 'user-1', role: 'user', name: 'Rahul Sharma' };
+    return { id: 'user-1', role: 'user', name: 'Demo User' };
+  };
+
   // Redirect if already authenticated
   if (isAuthenticated) {
-    navigate(from, { replace: true });
-    return null;
+    return <Navigate to={from} replace />;
   }
 
   const handleMockLogin = async (e: React.FormEvent) => {
@@ -43,25 +52,22 @@ const Auth = () => {
     await new Promise((r) => setTimeout(r, 1000));
 
     if (email && password.length >= 6) {
-      // Determine role from email for demo
-      let role: UserRole = 'user';
-      if (email.includes('admin')) role = 'admin';
-      else if (email.includes('owner')) role = 'owner';
+      const identity = getMockIdentityFromEmail(email);
 
       const user: User = {
-        id: 'user-' + Date.now(),
-        name: role === 'admin' ? 'Admin User' : role === 'owner' ? 'Turf Owner' : 'John Doe',
+        id: identity.id,
+        name: identity.name,
         email,
         phone: '+91 98765 43210',
-        role,
+        role: identity.role,
         createdAt: new Date().toISOString(),
       };
       mockLogin(user);
       toast({ title: 'Welcome back!', description: 'You have successfully logged in.' });
 
       // Navigate based on role
-      if (role === 'admin') navigate('/admin');
-      else if (role === 'owner') navigate('/owner');
+      if (identity.role === 'admin') navigate('/admin');
+      else if (identity.role === 'owner') navigate('/owner');
       else navigate(from);
     } else {
       toast({ title: 'Login failed', description: 'Invalid credentials', variant: 'destructive' });
@@ -85,7 +91,7 @@ const Auth = () => {
     await new Promise((r) => setTimeout(r, 1000));
 
     const user: User = {
-      id: 'user-' + Date.now(),
+      id: selectedRole === 'owner' ? `owner-${Date.now()}` : `user-${Date.now()}`,
       name,
       email,
       phone,

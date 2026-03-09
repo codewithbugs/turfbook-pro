@@ -113,8 +113,9 @@ class Store {
 
   // Mock login helper (for demo without Auth0 configured)
   mockLoginAs(role: 'user' | 'owner' | 'admin', name?: string, email?: string) {
+    const defaultId = role === 'admin' ? 'admin-1' : role === 'owner' ? 'owner-1' : 'user-1';
     const user: User = {
-      id: 'user-' + Date.now(),
+      id: defaultId,
       name: name || (role === 'admin' ? 'Admin User' : role === 'owner' ? 'Turf Owner' : 'John Doe'),
       email: email || `${role}@turfbook.in`,
       phone: '+91 98765 43210',

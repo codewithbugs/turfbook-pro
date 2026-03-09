@@ -16,14 +16,15 @@ export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const { user, isAuthenticated, logout, isOwner, isAdmin } = useAuth();
+  const isUser = isAuthenticated && !isOwner && !isAdmin;
 
   const navLinks = [
     { href: '/', label: 'Home' },
     { href: '/turfs', label: 'Browse Turfs' },
   ];
 
-  // Only show "My Bookings" to authenticated users
-  if (isAuthenticated) {
+  // Only show "My Bookings" to end users
+  if (isUser) {
     navLinks.push({ href: '/bookings', label: 'My Bookings' });
   }
 
@@ -72,6 +73,13 @@ export const Navbar = () => {
 
             {isAuthenticated ? (
               <>
+                {isUser && (
+                  <Link to="/turfs">
+                    <Button variant="outline" size="sm">
+                      Book Turf
+                    </Button>
+                  </Link>
+                )}
                 {dashboardLink && (
                   <Link to={dashboardLink}>
                     <Button variant="outline" size="sm" className="gap-2">
@@ -98,12 +106,14 @@ export const Navbar = () => {
                       <p className="text-xs text-muted-foreground capitalize">{user?.role}</p>
                     </div>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link to="/bookings" className="gap-2">
-                        <Calendar className="w-4 h-4" />
-                        My Bookings
-                      </Link>
-                    </DropdownMenuItem>
+                    {isUser && (
+                      <DropdownMenuItem asChild>
+                        <Link to="/bookings" className="gap-2">
+                          <Calendar className="w-4 h-4" />
+                          My Bookings
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
                     {dashboardLink && (
                       <DropdownMenuItem asChild>
                         <Link to={dashboardLink} className="gap-2">
@@ -155,6 +165,11 @@ export const Navbar = () => {
               <div className="flex flex-col gap-2 pt-4 border-t border-border">
                 {isAuthenticated ? (
                   <>
+                    {isUser && (
+                      <Link to="/turfs" onClick={() => setIsOpen(false)}>
+                        <Button variant="outline" className="w-full">Book Turf</Button>
+                      </Link>
+                    )}
                     {dashboardLink && (
                       <Link to={dashboardLink} onClick={() => setIsOpen(false)}>
                         <Button variant="outline" className="w-full gap-2">

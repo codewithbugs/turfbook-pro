@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Search, MapPin, Trophy, Users, Calendar } from 'lucide-react';
-import heroImage from '@/assets/hero-turf.jpg';
+import { Search, MapPin, Trophy, Users } from 'lucide-react';
 import { cities } from '@/lib/data';
+import heroImage from '@/assets/hero-turf.jpg';
 
 export const Hero = () => {
   const [selectedCity, setSelectedCity] = useState('');

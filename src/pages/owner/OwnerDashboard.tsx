@@ -55,15 +55,22 @@ const OwnerDashboard = () => {
     };
   }, [myTurfs, myBookings]);
 
-  // Weekly booking data for chart
+  // Weekly booking data for chart (last 7 days)
   const weeklyData = useMemo(() => {
-    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    return days.map((day, i) => ({
-      name: day,
-      bookings: Math.floor(Math.random() * 8) + 1,
-      revenue: Math.floor(Math.random() * 15000) + 2000,
-    }));
-  }, []);
+    const dayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const result = Array.from({ length: 7 }).map((_, index) => {
+      const date = new Date();
+      date.setDate(date.getDate() - (6 - index));
+      const key = date.toISOString().split('T')[0];
+      const dayBookings = myBookings.filter((b) => b.date.startsWith(key));
+      return {
+        name: dayLabels[date.getDay()],
+        bookings: dayBookings.length,
+        revenue: dayBookings.reduce((sum, b) => sum + b.totalAmount, 0),
+      };
+    });
+    return result;
+  }, [myBookings]);
 
   // Sport distribution
   const sportData = useMemo(() => {

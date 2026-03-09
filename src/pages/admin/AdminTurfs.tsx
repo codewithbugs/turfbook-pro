@@ -53,13 +53,26 @@ const AdminTurfs = () => {
   const [adminComment, setAdminComment] = useState('');
 
   const filteredTurfs = useMemo(() => {
-    return turfs.filter((turf) => {
-      const matchesSearch =
-        turf.name.toLowerCase().includes(search.toLowerCase()) ||
-        turf.address.toLowerCase().includes(search.toLowerCase());
-      const matchesApproval = !approvalFilter || turf.approvalStatus === approvalFilter;
-      return matchesSearch && matchesApproval;
-    });
+    const priority: Record<string, number> = {
+      pending: 0,
+      changes_requested: 1,
+      rejected: 2,
+      approved: 3,
+    };
+
+    return turfs
+      .filter((turf) => {
+        const matchesSearch =
+          turf.name.toLowerCase().includes(search.toLowerCase()) ||
+          turf.address.toLowerCase().includes(search.toLowerCase());
+        const matchesApproval = !approvalFilter || turf.approvalStatus === approvalFilter;
+        return matchesSearch && matchesApproval;
+      })
+      .sort((a, b) => {
+        const byStatus = (priority[a.approvalStatus] ?? 99) - (priority[b.approvalStatus] ?? 99);
+        if (byStatus !== 0) return byStatus;
+        return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+      });
   }, [turfs, search, approvalFilter]);
 
   const approvalCounts = useMemo(() => ({

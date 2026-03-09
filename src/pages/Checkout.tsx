@@ -11,6 +11,7 @@ import { Separator } from '@/components/ui/separator';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast } from '@/hooks/use-toast';
 import { store } from '@/lib/store';
+import { useAuth } from '@/lib/auth-context';
 import { 
   CreditCard, 
   Smartphone, 
@@ -42,19 +43,27 @@ interface BookingDetails {
 const Checkout = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const bookingDetails = location.state as BookingDetails | null;
   
   const [paymentMethod, setPaymentMethod] = useState('upi');
   const [loading, setLoading] = useState(false);
   
   // Form fields
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
+  const [name, setName] = useState(user?.name || '');
+  const [email, setEmail] = useState(user?.email || '');
+  const [phone, setPhone] = useState(user?.phone || '');
   const [upiId, setUpiId] = useState('');
   const [cardNumber, setCardNumber] = useState('');
   const [cardExpiry, setCardExpiry] = useState('');
   const [cardCvv, setCardCvv] = useState('');
+  const isContactValid = !!name.trim() && !!email.trim() && !!phone.trim();
+  const isUpiValid = paymentMethod !== 'upi' || upiId.includes('@');
+  const isCardValid =
+    paymentMethod !== 'card' ||
+    (cardNumber.replace(/\s/g, '').length >= 12 && !!cardExpiry.trim() && cardCvv.length >= 3);
+  const isPaymentDetailsValid = isUpiValid && isCardValid;
+  const canPay = isContactValid && isPaymentDetailsValid && !loading;
   
   if (!bookingDetails) {
     return (
@@ -73,10 +82,24 @@ const Checkout = () => {
   const handlePayment = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!name || !email || !phone) {
+    if (!isContactValid) {
       toast({
         title: 'Missing information',
         description: 'Please fill in all contact details.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (!isPaymentDetailsValid) {
+      toast({
+        title: 'Invalid payment details',
+        description:
+          paymentMethod === 'upi'
+            ? 'Please enter a valid UPI ID (example@bank).'
+            : paymentMethod === 'card'
+            ? 'Please enter valid card details.'
+            : 'Please check payment details.',
         variant: 'destructive',
       });
       return;
@@ -90,7 +113,7 @@ const Checkout = () => {
     // Create booking
     store.createBooking({
       turfId: bookingDetails.turfId,
-      userId: 'guest-' + Date.now(),
+      userId: user?.id || 'user-1',
       date: bookingDetails.date,
       slots: bookingDetails.slots,
       sport: bookingDetails.sport as 'cricket' | 'football',
@@ -263,6 +286,9 @@ const Checkout = () => {
                           onChange={(e) => setUpiId(e.target.value)}
                           className="h-12 bg-secondary border-border"
                         />
+                        {!isUpiValid && (
+                          <p className="text-xs text-destructive">Enter a valid UPI ID like `name@bank`.</p>
+                        )}
                       </div>
                     )}
                     
@@ -302,6 +328,9 @@ const Checkout = () => {
                             />
                           </div>
                         </div>
+                        {!isCardValid && (
+                          <p className="text-xs text-destructive">Card number, expiry, and CVV are required.</p>
+                        )}
                       </div>
                     )}
                     
@@ -401,7 +430,7 @@ const Checkout = () => {
                     size="xl" 
                     className="w-full"
                     onClick={handlePayment}
-                    disabled={loading}
+                    disabled={!canPay}
                   >
                     {loading ? 'Processing...' : `Pay ₹${bookingDetails.total.toLocaleString()}`}
                   </Button>

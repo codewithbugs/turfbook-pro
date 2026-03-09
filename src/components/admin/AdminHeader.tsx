@@ -1,6 +1,7 @@
-import { Bell, Search, User } from 'lucide-react';
+import { Bell, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useAuth } from '@/lib/auth-context';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,6 +18,16 @@ interface AdminHeaderProps {
 }
 
 export const AdminHeader = ({ title, subtitle }: AdminHeaderProps) => {
+  const { user, logout } = useAuth();
+  const initials = user?.name
+    ? user.name
+        .split(' ')
+        .map((p) => p[0])
+        .join('')
+        .slice(0, 2)
+        .toUpperCase()
+    : 'A';
+
   return (
     <header className="h-16 border-b border-border bg-card/50 backdrop-blur-lg flex items-center justify-between px-6">
       <div>
@@ -46,7 +57,7 @@ export const AdminHeader = ({ title, subtitle }: AdminHeaderProps) => {
             <Button variant="ghost" size="icon" className="rounded-full">
               <Avatar className="w-9 h-9">
                 <AvatarFallback className="bg-primary text-primary-foreground font-semibold">
-                  A
+                  {initials}
                 </AvatarFallback>
               </Avatar>
             </Button>
@@ -54,15 +65,15 @@ export const AdminHeader = ({ title, subtitle }: AdminHeaderProps) => {
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel>
               <div>
-                <p className="font-semibold">Admin User</p>
-                <p className="text-sm text-muted-foreground">admin@turfbook.in</p>
+                <p className="font-semibold">{user?.name || 'Admin User'}</p>
+                <p className="text-sm text-muted-foreground">{user?.email || 'admin@turfbook.in'}</p>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem>Profile Settings</DropdownMenuItem>
             <DropdownMenuItem>Help Center</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive">Logout</DropdownMenuItem>
+            <DropdownMenuItem className="text-destructive" onClick={logout}>Logout</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

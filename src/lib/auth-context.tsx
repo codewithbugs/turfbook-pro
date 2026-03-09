@@ -22,7 +22,41 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 // Check if Auth0 is configured with real credentials
 const isAuth0Configured = () => {
   const domain = import.meta.env.VITE_AUTH0_DOMAIN;
-  return domain && domain !== 'your-tenant.auth0.com';
+  const clientId = import.meta.env.VITE_AUTH0_CLIENT_ID;
+  return !!domain &&
+    !!clientId &&
+    domain !== 'your-tenant.auth0.com' &&
+    clientId !== 'your-client-id';
+};
+
+const getMockIdentity = (email: string): Pick<User, 'id' | 'role' | 'name'> => {
+  const normalized = email.trim().toLowerCase();
+
+  if (normalized.includes('admin')) {
+    return { id: 'admin-1', role: 'admin', name: 'Admin User' };
+  }
+
+  if (normalized === 'owner@example.com' || normalized.includes('owner')) {
+    return { id: 'owner-1', role: 'owner', name: 'Turf Owner' };
+  }
+
+  if (normalized === 'rahul@example.com') {
+    return { id: 'user-1', role: 'user', name: 'Rahul Sharma' };
+  }
+
+  return { id: 'user-1', role: 'user', name: 'Demo User' };
+};
+
+const buildMockUser = (email: string, provider: 'email' | 'google' | 'phone'): User => {
+  const identity = getMockIdentity(email);
+  return {
+    id: identity.id,
+    name: identity.name,
+    email,
+    phone: provider === 'phone' ? '+91 98765 43210' : '+91 90000 00000',
+    role: identity.role,
+    createdAt: new Date().toISOString(),
+  };
 };
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -42,6 +76,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.removeItem('turfbook_user');
     }
   }, [mockUser]);
+
+  // Register setter so mockLogin() can update context without full reload
+  useEffect(() => {
+    registerMockAuthSetter(setMockUser);
+    return () => registerMockAuthSetter(() => {});
+  }, []);
 
   // Map Auth0 user to our User type
   const mapAuth0User = useCallback((): User | null => {
@@ -92,7 +132,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         authorizationParams: { connection: 'sms' },
       });
     } else {
-      window.location.href = '/auth';
+      mockLogin(buildMockUser('user.phone@turfbook.in', 'phone'));
     }
   }, [auth0, useRealAuth0]);
 
@@ -102,7 +142,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         authorizationParams: { connection: 'google-oauth2' },
       });
     } else {
-      window.location.href = '/auth';
+      mockLogin(buildMockUser('user.google@turfbook.in', 'google'));
     }
   }, [auth0, useRealAuth0]);
 

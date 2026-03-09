@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
@@ -43,6 +43,12 @@ const TurfDetail = () => {
   const [selectedSport, setSelectedSport] = useState<'cricket' | 'football'>('football');
 
   const turf = turfs.find((t) => t.id === id);
+
+  useEffect(() => {
+    if (turf && turf.sports.length > 0 && !turf.sports.includes(selectedSport)) {
+      setSelectedSport(turf.sports[0]);
+    }
+  }, [turf, selectedSport]);
 
   const timeSlots = useMemo(() => {
     if (!turf || !selectedDate) return [];
@@ -233,7 +239,14 @@ const TurfDetail = () => {
               {/* Time Slots */}
               <Card className="border-border">
                 <CardHeader>
-                  <CardTitle className="font-display text-xl">Select Time Slots</CardTitle>
+                  <CardTitle className="font-display text-xl">
+                    Select Time Slots
+                    {selectedSlots.length > 0 && (
+                      <span className="ml-2 text-sm font-normal text-muted-foreground">
+                        ({selectedSlots.length} selected)
+                      </span>
+                    )}
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
