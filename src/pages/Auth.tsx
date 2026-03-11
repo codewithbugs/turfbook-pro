@@ -99,7 +99,7 @@ const Auth = () => {
       createdAt: new Date().toISOString(),
     };
     mockLogin(user);
-    toast({ title: 'Account created!', description: 'Welcome to TurfBook.' });
+    toast({ title: 'Account created!', description: 'Welcome to TurfBookKaro.' });
 
     if (selectedRole === 'owner') navigate('/owner');
     else navigate('/');
@@ -127,7 +127,7 @@ const Auth = () => {
             <div className="w-12 h-12 rounded-xl bg-gradient-primary flex items-center justify-center shadow-glow">
               <span className="text-primary-foreground font-bold text-2xl">T</span>
             </div>
-            <span className="font-display font-bold text-2xl text-foreground">TurfBook</span>
+            <span className="font-display font-bold text-2xl text-foreground">TurfBookKaro</span>
           </Link>
 
           <div className="mt-20">
@@ -169,7 +169,7 @@ const Auth = () => {
               <div className="w-12 h-12 rounded-xl bg-gradient-primary flex items-center justify-center shadow-glow">
                 <span className="text-primary-foreground font-bold text-2xl">T</span>
               </div>
-              <span className="font-display font-bold text-2xl text-foreground">TurfBook</span>
+              <span className="font-display font-bold text-2xl text-foreground">TurfBookKaro</span>
             </Link>
           </div>
 
@@ -464,7 +464,7 @@ const Auth = () => {
           </Card>
 
           <p className="text-center text-xs text-muted-foreground mt-6">
-            By continuing, you agree to TurfBook's{' '}
+            By continuing, you agree to TurfBookKaro's{' '}
             <a href="#" className="text-primary hover:underline">Terms of Service</a>
             {' '}and{' '}
             <a href="#" className="text-primary hover:underline">Privacy Policy</a>
