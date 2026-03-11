@@ -1,12 +1,16 @@
-import { Turf, Booking, BookingWithDetails, TimeSlot, BlockedSlot, User, TurfApprovalStatus, BookingStatus } from './types';
+import { Turf, Booking, BookingWithDetails, TimeSlot, BlockedSlot, User, TurfApprovalStatus, BookingStatus, Notification } from './types';
 import { turfs as initialTurfs, generateTimeSlots } from './data';
 import { mockLogin } from './auth-context';
+
+// Re-export for backward compat
+export type { BookingWithDetails } from './types';
 
 // Store state
 interface StoreState {
   turfs: Turf[];
   bookings: BookingWithDetails[];
   blockedSlots: BlockedSlot[];
+  notifications: Notification[];
 }
 
 // Initial mock bookings with details
@@ -15,12 +19,12 @@ const mockBookings: BookingWithDetails[] = [
     id: 'booking-1',
     turfId: 'turf-1',
     userId: 'user-1',
-    date: '2024-12-10',
+    date: '2026-03-15',
     slots: ['slot-18', 'slot-19'],
     sport: 'football',
     totalAmount: 2700,
     status: 'confirmed',
-    createdAt: '2024-12-08T10:30:00Z',
+    createdAt: '2026-03-08T10:30:00Z',
     turfName: 'Green Arena Sports Complex',
     customerName: 'Rahul Sharma',
     customerEmail: 'rahul@example.com',
@@ -30,12 +34,12 @@ const mockBookings: BookingWithDetails[] = [
     id: 'booking-2',
     turfId: 'turf-2',
     userId: 'user-2',
-    date: '2024-12-11',
+    date: '2026-03-18',
     slots: ['slot-9', 'slot-10', 'slot-11'],
     sport: 'football',
     totalAmount: 4590,
     status: 'pending',
-    createdAt: '2024-12-08T14:15:00Z',
+    createdAt: '2026-03-08T14:15:00Z',
     turfName: 'Premier Turf Club',
     customerName: 'Priya Patel',
     customerEmail: 'priya@example.com',
@@ -45,12 +49,12 @@ const mockBookings: BookingWithDetails[] = [
     id: 'booking-3',
     turfId: 'turf-3',
     userId: 'user-3',
-    date: '2024-12-12',
+    date: '2026-03-20',
     slots: ['slot-10', 'slot-11'],
     sport: 'cricket',
     totalAmount: 3600,
     status: 'confirmed',
-    createdAt: '2024-12-07T09:00:00Z',
+    createdAt: '2026-03-07T09:00:00Z',
     turfName: 'Cricket Pitch Pro',
     customerName: 'Amit Kumar',
     customerEmail: 'amit@example.com',
@@ -60,12 +64,12 @@ const mockBookings: BookingWithDetails[] = [
     id: 'booking-4',
     turfId: 'turf-4',
     userId: 'user-4',
-    date: '2024-12-09',
+    date: '2026-03-09',
     slots: ['slot-17', 'slot-18', 'slot-19', 'slot-20'],
     sport: 'football',
     totalAmount: 5120,
     status: 'completed',
-    createdAt: '2024-12-05T16:45:00Z',
+    createdAt: '2026-03-05T16:45:00Z',
     turfName: 'Sports Hub Bangalore',
     customerName: 'Sneha Reddy',
     customerEmail: 'sneha@example.com',
@@ -75,16 +79,148 @@ const mockBookings: BookingWithDetails[] = [
     id: 'booking-5',
     turfId: 'turf-1',
     userId: 'user-5',
-    date: '2024-12-08',
+    date: '2026-03-08',
     slots: ['slot-6', 'slot-7'],
     sport: 'cricket',
     totalAmount: 2700,
     status: 'cancelled',
-    createdAt: '2024-12-04T11:20:00Z',
+    createdAt: '2026-03-04T11:20:00Z',
     turfName: 'Green Arena Sports Complex',
     customerName: 'Vikram Singh',
     customerEmail: 'vikram@example.com',
     customerPhone: '+91 54321 09876',
+  },
+  {
+    id: 'booking-6',
+    turfId: 'turf-5',
+    userId: 'user-6',
+    date: '2026-03-22',
+    slots: ['slot-14', 'slot-15'],
+    sport: 'football',
+    totalAmount: 4400,
+    status: 'pending',
+    createdAt: '2026-03-09T08:30:00Z',
+    turfName: 'Elite Football Arena',
+    customerName: 'Deepak Nair',
+    customerEmail: 'deepak@example.com',
+    customerPhone: '+91 91234 56780',
+  },
+  {
+    id: 'booking-7',
+    turfId: 'turf-6',
+    userId: 'user-7',
+    date: '2026-03-16',
+    slots: ['slot-8', 'slot-9', 'slot-10'],
+    sport: 'cricket',
+    totalAmount: 4200,
+    status: 'confirmed',
+    createdAt: '2026-03-06T12:00:00Z',
+    turfName: 'Chennai Cricket Ground',
+    customerName: 'Kavitha Rajan',
+    customerEmail: 'kavitha@example.com',
+    customerPhone: '+91 81234 56789',
+  },
+  {
+    id: 'booking-8',
+    turfId: 'turf-7',
+    userId: 'user-8',
+    date: '2026-03-25',
+    slots: ['slot-16', 'slot-17'],
+    sport: 'football',
+    totalAmount: 3400,
+    status: 'pending',
+    createdAt: '2026-03-09T17:45:00Z',
+    turfName: 'Hyderabad Sports Village',
+    customerName: 'Arjun Mehta',
+    customerEmail: 'arjun@example.com',
+    customerPhone: '+91 72345 67890',
+  },
+  {
+    id: 'booking-9',
+    turfId: 'turf-8',
+    userId: 'user-9',
+    date: '2026-03-07',
+    slots: ['slot-18', 'slot-19', 'slot-20'],
+    sport: 'football',
+    totalAmount: 3900,
+    status: 'completed',
+    createdAt: '2026-03-02T10:00:00Z',
+    turfName: 'Pune Football Club',
+    customerName: 'Meera Joshi',
+    customerEmail: 'meera@example.com',
+    customerPhone: '+91 63456 78901',
+  },
+  {
+    id: 'booking-10',
+    turfId: 'turf-10',
+    userId: 'user-10',
+    date: '2026-03-28',
+    slots: ['slot-7', 'slot-8'],
+    sport: 'cricket',
+    totalAmount: 3800,
+    status: 'confirmed',
+    createdAt: '2026-03-10T09:15:00Z',
+    turfName: 'South Delhi Sports Arena',
+    customerName: 'Rohan Gupta',
+    customerEmail: 'rohan@example.com',
+    customerPhone: '+91 99876 54321',
+  },
+];
+
+// Initial mock notifications
+const mockNotifications: Notification[] = [
+  {
+    id: 'notif-1',
+    title: 'Booking Confirmed',
+    message: 'Your booking at Green Arena Sports Complex on Mar 15 has been confirmed.',
+    type: 'booking',
+    read: false,
+    createdAt: '2026-03-08T10:35:00Z',
+    link: '/bookings',
+  },
+  {
+    id: 'notif-2',
+    title: 'New Booking Request',
+    message: 'Priya Patel has requested a booking at Premier Turf Club for Mar 18. Please review and approve.',
+    type: 'booking',
+    read: false,
+    createdAt: '2026-03-08T14:20:00Z',
+    link: '/bookings',
+  },
+  {
+    id: 'notif-3',
+    title: 'Turf Approved',
+    message: 'Your turf "Hyderabad Sports Village" has been approved by the admin and is now live.',
+    type: 'approval',
+    read: true,
+    createdAt: '2026-03-07T11:00:00Z',
+    link: '/owner/turfs',
+  },
+  {
+    id: 'notif-4',
+    title: 'Booking Completed',
+    message: 'The booking at Sports Hub Bangalore on Mar 9 has been marked as completed. Thank you!',
+    type: 'booking',
+    read: true,
+    createdAt: '2026-03-09T22:00:00Z',
+    link: '/bookings',
+  },
+  {
+    id: 'notif-5',
+    title: 'Scheduled Maintenance',
+    message: 'TurfBookKaro will undergo scheduled maintenance on Mar 30 from 2:00 AM to 4:00 AM IST.',
+    type: 'system',
+    read: false,
+    createdAt: '2026-03-10T06:00:00Z',
+  },
+  {
+    id: 'notif-6',
+    title: 'Welcome to TurfBookKaro!',
+    message: 'Thanks for joining TurfBookKaro. Explore turfs near you and book your first slot today.',
+    type: 'info',
+    read: true,
+    createdAt: '2026-03-01T00:00:00Z',
+    link: '/turfs',
   },
 ];
 
@@ -94,6 +230,7 @@ class Store {
     turfs: [...initialTurfs],
     bookings: [...mockBookings],
     blockedSlots: [],
+    notifications: [...mockNotifications],
   };
 
   private listeners: Set<() => void> = new Set();
@@ -117,7 +254,7 @@ class Store {
     const user: User = {
       id: defaultId,
       name: name || (role === 'admin' ? 'Admin User' : role === 'owner' ? 'Turf Owner' : 'John Doe'),
-      email: email || `${role}@turfbook.in`,
+      email: email || `${role}@turfbookkaro.in`,
       phone: '+91 98765 43210',
       role,
       createdAt: new Date().toISOString(),
@@ -264,6 +401,48 @@ class Store {
       blockedSlots: this.state.blockedSlots.filter((s) => s.id !== blockId),
     };
     this.notify();
+  }
+
+  // Notification methods
+  getNotifications() {
+    return this.state.notifications;
+  }
+
+  getUnreadCount() {
+    return this.state.notifications.filter((n) => !n.read).length;
+  }
+
+  markAsRead(id: string) {
+    this.state = {
+      ...this.state,
+      notifications: this.state.notifications.map((n) =>
+        n.id === id ? { ...n, read: true } : n
+      ),
+    };
+    this.notify();
+  }
+
+  markAllAsRead() {
+    this.state = {
+      ...this.state,
+      notifications: this.state.notifications.map((n) => ({ ...n, read: true })),
+    };
+    this.notify();
+  }
+
+  addNotification(notification: Omit<Notification, 'id' | 'createdAt' | 'read'>) {
+    const newNotification: Notification = {
+      ...notification,
+      id: 'notif-' + Date.now(),
+      read: false,
+      createdAt: new Date().toISOString(),
+    };
+    this.state = {
+      ...this.state,
+      notifications: [newNotification, ...this.state.notifications],
+    };
+    this.notify();
+    return newNotification;
   }
 }
 

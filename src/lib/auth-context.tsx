@@ -62,7 +62,7 @@ const buildMockUser = (email: string, provider: 'email' | 'google' | 'phone'): U
 export function AuthProvider({ children }: { children: ReactNode }) {
   const auth0 = useAuth0();
   const [mockUser, setMockUser] = useState<User | null>(() => {
-    const saved = localStorage.getItem('turfbook_user');
+    const saved = localStorage.getItem('turfbookkaro_user');
     return saved ? JSON.parse(saved) : null;
   });
 
@@ -71,9 +71,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Persist mock user to localStorage
   useEffect(() => {
     if (mockUser) {
-      localStorage.setItem('turfbook_user', JSON.stringify(mockUser));
+      localStorage.setItem('turfbookkaro_user', JSON.stringify(mockUser));
     } else {
-      localStorage.removeItem('turfbook_user');
+      localStorage.removeItem('turfbookkaro_user');
     }
   }, [mockUser]);
 
@@ -132,7 +132,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         authorizationParams: { connection: 'sms' },
       });
     } else {
-      mockLogin(buildMockUser('user.phone@turfbook.in', 'phone'));
+      mockLogin(buildMockUser('user.phone@turfbookkaro.in', 'phone'));
     }
   }, [auth0, useRealAuth0]);
 
@@ -142,7 +142,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         authorizationParams: { connection: 'google-oauth2' },
       });
     } else {
-      mockLogin(buildMockUser('user.google@turfbook.in', 'google'));
+      mockLogin(buildMockUser('user.google@turfbookkaro.in', 'google'));
     }
   }, [auth0, useRealAuth0]);
 
@@ -151,7 +151,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       auth0.logout({ logoutParams: { returnTo: window.location.origin } });
     } else {
       setMockUser(null);
-      localStorage.removeItem('turfbook_user');
+      localStorage.removeItem('turfbookkaro_user');
       window.location.href = '/';
     }
   }, [auth0, useRealAuth0]);
@@ -212,7 +212,7 @@ export function mockLogin(user: User) {
   if (_mockSetUser) {
     _mockSetUser(user);
   } else {
-    localStorage.setItem('turfbook_user', JSON.stringify(user));
+    localStorage.setItem('turfbookkaro_user', JSON.stringify(user));
     window.location.reload();
   }
 }

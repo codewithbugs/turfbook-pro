@@ -39,7 +39,7 @@ export const WhyChooseUs = () => {
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="font-display text-4xl md:text-5xl font-bold text-foreground mb-4">
-            Why Choose <span className="text-gradient">TurfBook</span>
+            Why Choose <span className="text-gradient">TurfBookKaro</span>
           </h2>
           <p className="text-lg text-muted-foreground max-w-xl mx-auto">
             Experience the best turf booking platform in India

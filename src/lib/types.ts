@@ -30,6 +30,7 @@ export interface Turf {
   ownerId: string;
   approvalStatus: TurfApprovalStatus;
   adminComment?: string;
+  description?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -76,4 +77,14 @@ export interface BlockedSlot {
   slotIds: string[];
   reason: string;
   createdAt: string;
+}
+
+export interface Notification {
+  id: string;
+  title: string;
+  message: string;
+  type: 'booking' | 'approval' | 'system' | 'info';
+  read: boolean;
+  createdAt: string;
+  link?: string;
 }

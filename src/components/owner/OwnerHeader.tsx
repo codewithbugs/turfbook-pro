@@ -1,4 +1,6 @@
 import { useAuth } from '@/lib/auth-context';
+import { store, useStore } from '@/lib/store';
+import { useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -11,17 +13,28 @@ import { Bell, ChevronDown, User, Settings, LogOut } from 'lucide-react';
 
 export const OwnerHeader = () => {
   const { user, logout } = useAuth();
+  const { notifications } = useStore();
+
+  const unreadCount = useMemo(() => store.getUnreadCount(), [notifications]);
 
   return (
     <header className="h-16 border-b border-border bg-card/80 backdrop-blur-xl flex items-center justify-between px-6">
+      {/* Left side: page title area */}
       <div />
 
+      {/* Right side */}
       <div className="flex items-center gap-3">
+        {/* Notification bell */}
         <Button variant="ghost" size="icon" className="relative">
           <Bell className="w-5 h-5" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-primary" />
+          {unreadCount > 0 && (
+            <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">
+              {unreadCount > 99 ? '99+' : unreadCount}
+            </span>
+          )}
         </Button>
 
+        {/* User dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="gap-2">
