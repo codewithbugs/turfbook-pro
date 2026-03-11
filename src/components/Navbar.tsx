@@ -66,7 +66,7 @@ const mockNotifications: Notification[] = [
   },
 ];
 
-export default function Navbar() {
+export function Navbar() {
   const { user, isAuthenticated, logout, role } = useAuth();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
