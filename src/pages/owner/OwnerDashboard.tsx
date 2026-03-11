@@ -22,12 +22,15 @@ import {
 import {
   Calendar,
   DollarSign,
-  TrendingUp,
   MapPin,
   Clock,
   Plus,
   ArrowRight,
   AlertCircle,
+  Eye,
+  Settings2,
+  CheckCircle2,
+  XCircle,
 } from 'lucide-react';
 
 const COLORS = ['hsl(var(--primary))', 'hsl(var(--accent))', '#10b981', '#f59e0b'];
@@ -90,19 +93,24 @@ const OwnerDashboard = () => {
     [myBookings]
   );
 
+  const handleConfirm = (id: string) => {
+    store.updateBookingStatus(id, 'confirmed');
+  };
+
+  const handleCancel = (id: string) => {
+    store.updateBookingStatus(id, 'cancelled');
+  };
+
   return (
     <div className="space-y-6">
+      {/* Title */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="font-display text-3xl font-bold text-foreground">Dashboard</h1>
-          <p className="text-muted-foreground">Overview of your turfs and bookings</p>
+          <p className="text-muted-foreground">
+            Welcome back, {user?.name || 'Owner'}
+          </p>
         </div>
-        <Link to="/owner/turfs">
-          <Button variant="hero" className="gap-2">
-            <Plus className="w-4 h-4" />
-            Add New Turf
-          </Button>
-        </Link>
       </div>
 
       {/* Pending Approval Alert */}
@@ -148,6 +156,28 @@ const OwnerDashboard = () => {
           changeType="neutral"
           icon={Clock}
         />
+      </div>
+
+      {/* Quick Actions */}
+      <div className="flex flex-wrap gap-3">
+        <Link to="/owner/turfs">
+          <Button variant="hero" className="gap-2">
+            <Plus className="w-4 h-4" />
+            Add New Turf
+          </Button>
+        </Link>
+        <Link to="/owner/bookings">
+          <Button variant="outline" className="gap-2">
+            <Eye className="w-4 h-4" />
+            View Bookings
+          </Button>
+        </Link>
+        <Link to="/owner/slots">
+          <Button variant="outline" className="gap-2">
+            <Settings2 className="w-4 h-4" />
+            Manage Slots
+          </Button>
+        </Link>
       </div>
 
       {/* Charts */}
@@ -235,7 +265,11 @@ const OwnerDashboard = () => {
                   <div>
                     <p className="font-semibold text-foreground">{booking.customerName}</p>
                     <p className="text-sm text-muted-foreground">
-                      {booking.turfName} &middot; {new Date(booking.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                      {booking.turfName} &middot;{' '}
+                      {new Date(booking.date).toLocaleDateString('en-IN', {
+                        day: 'numeric',
+                        month: 'short',
+                      })}
                     </p>
                   </div>
                   <div className="flex items-center gap-3">
@@ -255,6 +289,28 @@ const OwnerDashboard = () => {
                     >
                       {booking.status}
                     </Badge>
+                    {booking.status === 'pending' && (
+                      <div className="flex gap-1">
+                        <Button
+                          variant="default"
+                          size="sm"
+                          className="gap-1 h-7 px-2 text-xs"
+                          onClick={() => handleConfirm(booking.id)}
+                        >
+                          <CheckCircle2 className="w-3 h-3" />
+                          Confirm
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="gap-1 h-7 px-2 text-xs"
+                          onClick={() => handleCancel(booking.id)}
+                        >
+                          <XCircle className="w-3 h-3" />
+                          Cancel
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}

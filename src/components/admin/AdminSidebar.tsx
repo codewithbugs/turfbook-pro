@@ -1,11 +1,13 @@
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { store } from '@/lib/store';
 import { 
   LayoutDashboard, 
   MapPin, 
   Calendar, 
   Users, 
   Settings,
+  BarChart3,
   LogOut,
   ChevronLeft,
   Trophy
@@ -17,17 +19,19 @@ interface AdminSidebarProps {
   onToggle: () => void;
 }
 
-const navItems = [
-  { id: 'overview', label: 'Dashboard', icon: LayoutDashboard, path: '/admin' },
-  { id: 'turfs', label: 'Manage Turfs', icon: MapPin, path: '/admin/turfs' },
-  { id: 'bookings', label: 'Bookings', icon: Calendar, path: '/admin/bookings' },
-  { id: 'users', label: 'Users', icon: Users, path: '/admin/users' },
-  { id: 'settings', label: 'Settings', icon: Settings, path: '/admin/settings' },
-];
-
-export const AdminSidebar = ({ isCollapsed, onToggle }: AdminSidebarProps) => {
+const AdminSidebar = ({ isCollapsed, onToggle }: AdminSidebarProps) => {
   const location = useLocation();
-  
+  const pendingCount = store.getPendingTurfs().length;
+
+  const navItems = [
+    { id: 'overview', label: 'Dashboard', icon: LayoutDashboard, path: '/admin', badge: 0 },
+    { id: 'turfs', label: 'Manage Turfs', icon: MapPin, path: '/admin/turfs', badge: pendingCount },
+    { id: 'bookings', label: 'Bookings', icon: Calendar, path: '/admin/bookings', badge: 0 },
+    { id: 'users', label: 'Users', icon: Users, path: '/admin/users', badge: 0 },
+    { id: 'analytics', label: 'Analytics', icon: BarChart3, path: '/admin/analytics', badge: 0 },
+    { id: 'settings', label: 'Settings', icon: Settings, path: '/admin/settings', badge: 0 },
+  ];
+
   const isActive = (path: string) => {
     if (path === '/admin') {
       return location.pathname === '/admin';
@@ -45,12 +49,12 @@ export const AdminSidebar = ({ isCollapsed, onToggle }: AdminSidebarProps) => {
       {/* Header */}
       <div className="p-4 border-b border-border">
         <Link to="/admin" className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-gradient-primary flex items-center justify-center shrink-0">
+          <div className="w-10 h-10 rounded-full bg-gradient-primary flex items-center justify-center shrink-0">
             <Trophy className="w-5 h-5 text-primary-foreground" />
           </div>
           {!isCollapsed && (
             <div>
-              <span className="font-display font-bold text-foreground">TurfBook</span>
+              <span className="font-display font-bold text-foreground">TurfBookKaro</span>
               <p className="text-xs text-muted-foreground">Admin Panel</p>
             </div>
           )}
@@ -71,7 +75,22 @@ export const AdminSidebar = ({ isCollapsed, onToggle }: AdminSidebarProps) => {
             )}
           >
             <item.icon className="w-5 h-5 shrink-0" />
-            {!isCollapsed && <span className="font-medium">{item.label}</span>}
+            {!isCollapsed && (
+              <span className="font-medium flex-1">{item.label}</span>
+            )}
+            {!isCollapsed && item.badge > 0 && (
+              <span className={cn(
+                "px-2 py-0.5 rounded-full text-xs font-semibold",
+                isActive(item.path)
+                  ? "bg-primary-foreground/20 text-primary-foreground"
+                  : "bg-primary/10 text-primary"
+              )}>
+                {item.badge}
+              </span>
+            )}
+            {isCollapsed && item.badge > 0 && (
+              <span className="absolute right-2 top-1 w-2 h-2 rounded-full bg-primary" />
+            )}
           </Link>
         ))}
       </nav>
@@ -100,3 +119,5 @@ export const AdminSidebar = ({ isCollapsed, onToggle }: AdminSidebarProps) => {
     </aside>
   );
 };
+
+export { AdminSidebar };

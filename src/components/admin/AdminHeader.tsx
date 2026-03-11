@@ -66,7 +66,7 @@ export const AdminHeader = ({ title, subtitle }: AdminHeaderProps) => {
             <DropdownMenuLabel>
               <div>
                 <p className="font-semibold">{user?.name || 'Admin User'}</p>
-                <p className="text-sm text-muted-foreground">{user?.email || 'admin@turfbook.in'}</p>
+                <p className="text-sm text-muted-foreground">{user?.email || 'admin@turfbookkaro.in'}</p>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />

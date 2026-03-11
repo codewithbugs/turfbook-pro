@@ -1,11 +1,14 @@
-import { turfs } from '@/lib/data';
+import { useStore } from '@/lib/store';
 import { TurfCard } from './TurfCard';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export const FeaturedTurfs = () => {
-  const featuredTurfs = turfs.filter((t) => t.featured).slice(0, 4);
+  const state = useStore();
+  const featuredTurfs = state.turfs
+    .filter((t) => t.featured && t.approvalStatus === 'approved')
+    .slice(0, 4);
 
   return (
     <section className="py-20 bg-background">

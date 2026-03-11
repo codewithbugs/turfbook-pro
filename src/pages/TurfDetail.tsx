@@ -23,6 +23,7 @@ import {
   ParkingMeter,
   Lightbulb,
   ShirtIcon,
+  Info,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -122,19 +123,30 @@ const TurfDetail = () => {
 
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-4 max-w-6xl">
-          <Button variant="ghost" className="mb-6 gap-2" onClick={() => navigate(-1)}>
-            <ChevronLeft className="w-4 h-4" />
-            Back to Turfs
-          </Button>
+          <Link to="/turfs">
+            <Button variant="ghost" className="mb-6 gap-2">
+              <ChevronLeft className="w-4 h-4" />
+              Back to Turfs
+            </Button>
+          </Link>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Main Info */}
             <div className="lg:col-span-2 space-y-6">
               {/* Hero Image */}
               <div className="relative aspect-video rounded-2xl overflow-hidden bg-secondary">
-                <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
+                {turf.imageUrl && turf.imageUrl !== '/placeholder.svg' ? (
+                  <img
+                    src={turf.imageUrl}
+                    alt={turf.name}
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/30 via-secondary to-primary/10" />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/30 to-transparent" />
                 <div className="absolute bottom-6 left-6 right-6">
-                  <div className="flex gap-2 mb-3">
+                  <div className="flex flex-wrap gap-2 mb-3">
                     {turf.sports.map((sport) => (
                       <Badge key={sport} variant="sport" className="capitalize">
                         {sport}
@@ -145,7 +157,7 @@ const TurfDetail = () => {
                   <h1 className="font-display text-3xl md:text-4xl font-bold text-foreground">
                     {turf.name}
                   </h1>
-                  <div className="flex items-center gap-4 mt-2 text-muted-foreground">
+                  <div className="flex flex-wrap items-center gap-4 mt-2 text-muted-foreground">
                     <div className="flex items-center gap-1">
                       <MapPin className="w-4 h-4" />
                       {turf.address}
@@ -158,7 +170,7 @@ const TurfDetail = () => {
                 </div>
               </div>
 
-              {/* Details */}
+              {/* Venue Details */}
               <Card className="border-border">
                 <CardHeader>
                   <CardTitle className="font-display text-xl">Venue Details</CardTitle>
@@ -192,22 +204,40 @@ const TurfDetail = () => {
                       </p>
                     </div>
                   </div>
+                </CardContent>
+              </Card>
 
-                  <Separator />
+              {/* Description */}
+              {turf.description && (
+                <Card className="border-border">
+                  <CardHeader>
+                    <CardTitle className="font-display text-xl">About This Venue</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground leading-relaxed">{turf.description}</p>
+                  </CardContent>
+                </Card>
+              )}
 
-                  <div>
-                    <h3 className="font-display font-semibold text-foreground mb-3">Amenities</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {turf.amenities.map((amenity) => (
+              {/* Amenities */}
+              <Card className="border-border">
+                <CardHeader>
+                  <CardTitle className="font-display text-xl">Amenities</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-2">
+                    {turf.amenities.map((amenity) => {
+                      const Icon = amenityIcons[amenity] || Check;
+                      return (
                         <div
                           key={amenity}
                           className="flex items-center gap-2 px-3 py-2 rounded-lg bg-secondary text-sm"
                         >
-                          <Check className="w-4 h-4 text-primary" />
+                          <Icon className="w-4 h-4 text-primary" />
                           {amenity}
                         </div>
-                      ))}
-                    </div>
+                      );
+                    })}
                   </div>
                 </CardContent>
               </Card>
@@ -248,7 +278,7 @@ const TurfDetail = () => {
                     )}
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="space-y-4">
                   <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
                     {timeSlots.map((slot) => (
                       <button
@@ -257,12 +287,12 @@ const TurfDetail = () => {
                         onClick={() => toggleSlot(slot.id)}
                         className={cn(
                           'p-3 rounded-xl border text-center transition-all',
-                          !slot.available && 'opacity-40 cursor-not-allowed bg-secondary border-border',
+                          !slot.available && 'opacity-40 cursor-not-allowed bg-secondary border-border line-through',
                           slot.available &&
                             !selectedSlots.includes(slot.id) &&
                             'border-border hover:border-primary/50 cursor-pointer',
                           selectedSlots.includes(slot.id) &&
-                            'border-primary bg-primary/10 ring-1 ring-primary'
+                            'border-primary bg-primary/10 ring-2 ring-primary shadow-sm'
                         )}
                       >
                         <p className="font-semibold text-foreground text-sm">{slot.time}</p>
@@ -271,6 +301,15 @@ const TurfDetail = () => {
                         </p>
                       </button>
                     ))}
+                  </div>
+
+                  {/* Discount Info Banner */}
+                  <div className="flex items-start gap-3 p-4 rounded-xl bg-primary/5 border border-primary/20">
+                    <Info className="w-5 h-5 text-primary mt-0.5 shrink-0" />
+                    <div className="text-sm text-muted-foreground">
+                      <p className="font-semibold text-foreground mb-1">Multi-hour discounts</p>
+                      <p>Book 2+ hours for 10% off, 3+ hours for 15% off, 4+ hours for 20% off</p>
+                    </div>
                   </div>
                 </CardContent>
               </Card>

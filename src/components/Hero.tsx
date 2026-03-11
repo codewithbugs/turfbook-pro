@@ -64,7 +64,7 @@ export const Hero = () => {
         <div className="max-w-4xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6 animate-fade-in">
             <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-            <span className="text-sm font-medium text-primary">Book Your Game Today</span>
+            <span className="text-sm font-medium text-primary">Book Your Game Today on TurfBookKaro</span>
           </div>
 
           <h1 className="font-display text-5xl md:text-7xl font-bold mb-6 animate-slide-up">
@@ -75,7 +75,7 @@ export const Hero = () => {
           </h1>
 
           <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto animate-fade-in" style={{ animationDelay: '0.2s' }}>
-            Book cricket and football turfs instantly across major cities. 
+            Book cricket and football turfs instantly across major cities with TurfBookKaro.
             Get exclusive discounts on multi-hour bookings.
           </p>
 

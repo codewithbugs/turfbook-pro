@@ -25,6 +25,7 @@ import AdminTurfs from "./pages/admin/AdminTurfs";
 import AdminBookings from "./pages/admin/AdminBookings";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminSettings from "./pages/admin/AdminSettings";
+import AdminAnalytics from "./pages/admin/AdminAnalytics";
 
 // Owner pages
 import OwnerLayout from "./pages/owner/OwnerLayout";
@@ -108,6 +109,7 @@ const App = () => (
                 <Route path="turfs" element={<AdminTurfs />} />
                 <Route path="bookings" element={<AdminBookings />} />
                 <Route path="users" element={<AdminUsers />} />
+                <Route path="analytics" element={<AdminAnalytics />} />
                 <Route path="settings" element={<AdminSettings />} />
               </Route>
 

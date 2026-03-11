@@ -20,8 +20,8 @@ import {
 
 const AdminSettings = () => {
   const [settings, setSettings] = useState({
-    siteName: 'TurfBook',
-    supportEmail: 'support@turfbook.in',
+    siteName: 'TurfBookKaro',
+    supportEmail: 'support@turfbookkaro.in',
     supportPhone: '+91 98765 43210',
     emailNotifications: true,
     smsNotifications: true,
